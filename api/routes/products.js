@@ -10,49 +10,81 @@ router.get('/', (req, res) => {
                 error: err
             });
         } else {
-            res.send(products);
+            res.status(200).json({
+                data: {
+                    count: products.length,
+                    products: products.map(product => {
+                        return {
+                            id: product.id,
+                            name: product.name,
+                            price: product.price,
+                            category: product.category,
+                            request: {
+                                type: req.method,
+                                url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + product.id,
+                            }
+                        }
+                    })
+                }
+            });
         }
     });
 });
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', (req, res) => {
     Product.findById(req.params.id, (err, product) => {
         if(err) {
             res.status(404).json({
                 error: err
             });
         } else {
-            res.send(product);
+            res.status(200).json({
+                data: {
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    categort: product.category
+                }
+            });
         }
     });
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', (req, res) => {
     const product = {
         name: req.body.name,
         category: req.body.category,
         price: req.body.price
     };
 
-    new Product(product).save(err => {
+    new Product(product).save((err, item) => {
         if(err) {
             res.status(404).json({
                 error: err
             });
         } else {
-            res.send('Product created successfully');
+            res.status(201).json({
+                data: {
+                    message: 'Product created successfully',
+                    url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + item.id
+                }
+            });
         }
     });
 });
 
-router.put('/:id', (req, res, next) => {
+router.put('/:id', (req, res) => {
     Product.findByIdAndUpdate(req.params.id, {$set: req.body}, (err, product) => {
         if(err) {
             res.status(404).json({
                 error: err
             });
         } else {
-            res.send('Product updated successfully');
+            res.status(200).json({
+                data: {
+                    message: 'Product updated successfully'
+                }
+            });
         }
     });
 });
@@ -64,7 +96,11 @@ router.delete('/:id', (req, res) => {
                 error: err
             });
         } else {
-            res.send('Product deleted successfully');
+            res.status(200).json({
+                data: {
+                    message: 'Product deleted successfully'
+                }
+            });
         }
     });
 });
