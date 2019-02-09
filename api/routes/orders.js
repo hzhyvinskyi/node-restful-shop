@@ -1,46 +1,135 @@
 const express = require('express');
 const router = express.Router();
 
+const Order = require('../models/order');
+
 router.get('/', (req, res) => {
-    res.status(200).json({
-        message: 'Orders list'
-    });
+    Order.find()
+        .select('id product quantity')
+        .populate('product', 'id name category price')
+        .exec((err, orders) => {
+            if(err) {
+                res.status(400).json({
+                    error: err
+                });
+            } else {
+                res.status(200).json({
+                    count: orders.length,
+                    orders: orders.map(order => {
+                        return {
+                            id: order.id,
+                            product: {
+                                id: order.product.id,
+                                name: order.product.name,
+                                category: order.product.category,
+                                price: order.product.price,
+                                request: {
+                                    type: 'GET',
+                                    url: req.protocol + '://' + req.get('host') + '/products/' + order.product.id
+                                }
+                            },
+                            quantity: order.quantity,
+                            request: {
+                                type: req.method,
+                                url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + order.id
+                            }
+                        }
+                    })
+                });
+            }
+        });
 });
 
 router.get('/:id', (req, res) => {
-    const id = req.params.id;
-    if(id === 'secret') {
-        res.status(200).json({
-            message: 'Discovered!',
-            id: id
-        });
-    } else {
-        res.status(404).json({
-            message: 'Not Found'
-        });
-    }
+    Order.findById(req.params.id)
+        .select('id product quantity')
+        .populate('product', 'id name category price')
+        .exec((err, order) => {
+        if(err) {
+            res.status(400).json({
+                error: err
+            });
+        } else {
+            res.status(200).json({
+                id: order.id,
+                product: {
+                    id: order.product.id,
+                    name: order.product.name,
+                    category: order.product.category,
+                    price: order.product.price,
+                    request: {
+                        type: 'GET',
+                        url: req.protocol + '://' + req.get('host') + '/products/' + order.product.id
+                    }
+                },
+                quantity: order.quantity
+            });
+        }
+    });
 });
 
 router.post('/', (req, res) => {
     const order = {
-        name: req.body.name,
+        product: req.body.product,
         quantity: req.body.quantity
     }
-    res.status(201).json({
-        message: 'Order created',
-        order: order
-    })
-});
-
-router.put('/:id', (req, res) => {
-    res.status(200).json({
-        message: 'Order updated'
+    new Order(order).save((err, item) => {
+        if(err) {
+            res.status(400).json({
+                error: err
+            });
+        } else {
+            res.status(201).json({
+                message: 'Order created',
+                order: {
+                    id: item.id,
+                    product: item.product,
+                    quantity: item.quantity,
+                    url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + item.id
+                }
+            });
+        }
     });
 });
 
+router.put('/:id', (req, res) => {
+    Order.findByIdAndUpdate(
+        req.params.id,
+        {
+            $set: {
+                product: req.body.product, quantity: req.body.quantity
+            }
+        },
+        (err, order) => {
+            if(err) {
+                res.status(400).json({
+                    error: err
+                });
+            } else {
+                res.status(200).json({
+                    message: 'Order updated successfully',
+                    order: {
+                        id: order.id,
+                        product: req.body.product,
+                        quantity: req.body.quantity
+                    }
+                });
+            }
+        }
+    );
+});
+
 router.delete('/:id', (req, res) => {
-    res.status(200).json({
-        message: 'Order deleted'
+    Order.findByIdAndRemove(req.params.id, err => {
+        if(err) {
+            res.status(400).json({
+                error: err
+            });
+        } else {
+            res.status(200).json({
+                message: 'Order deleted successfully'
+            });
+        }
     });
 });
 

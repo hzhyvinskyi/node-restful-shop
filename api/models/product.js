@@ -15,6 +15,10 @@ const ProductSchema = new Schema({
     price: {
         type: Number,
         required: true
+    },
+    order: {
+        type: Schema.Types.ObjectId,
+        ref: 'Order'
     }
 });
 

@@ -6,26 +6,24 @@ const Product = require('../models/product');
 router.get('/', (req, res) => {
     Product.find((err, products) => {
         if(err) {
-            res.status(404).json({
+            res.status(400).json({
                 error: err
             });
         } else {
             res.status(200).json({
-                data: {
-                    count: products.length,
-                    products: products.map(product => {
-                        return {
-                            id: product.id,
-                            name: product.name,
-                            price: product.price,
-                            category: product.category,
-                            request: {
-                                type: req.method,
-                                url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + product.id,
-                            }
+                count: products.length,
+                products: products.map(product => {
+                    return {
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        category: product.category,
+                        request: {
+                            type: req.method,
+                            url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + product.id,
                         }
-                    })
-                }
+                    }
+                })
             });
         }
     });
@@ -39,12 +37,10 @@ router.get('/:id', (req, res) => {
             });
         } else {
             res.status(200).json({
-                data: {
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    categort: product.category
-                }
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                category: product.category
             });
         }
     });
@@ -64,10 +60,8 @@ router.post('/', (req, res) => {
             });
         } else {
             res.status(201).json({
-                data: {
-                    message: 'Product created successfully',
-                    url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + item.id
-                }
+                message: 'Product created successfully',
+                url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + item.id
             });
         }
     });
@@ -81,9 +75,7 @@ router.put('/:id', (req, res) => {
             });
         } else {
             res.status(200).json({
-                data: {
-                    message: 'Product updated successfully'
-                }
+                message: 'Product updated successfully'
             });
         }
     });
@@ -97,9 +89,7 @@ router.delete('/:id', (req, res) => {
             });
         } else {
             res.status(200).json({
-                data: {
-                    message: 'Product deleted successfully'
-                }
+                message: 'Product deleted successfully'
             });
         }
     });
