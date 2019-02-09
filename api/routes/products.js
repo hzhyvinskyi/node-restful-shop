@@ -1,46 +1,71 @@
 const express = require('express');
 const router = express.Router();
 
+const Product = require('../models/product');
+
 router.get('/', (req, res) => {
-    res.status(200).json({
-        message: 'Products list'
+    Product.find((err, products) => {
+        if(err) {
+            res.status(404).json({
+                error: err
+            });
+        } else {
+            res.send(products);
+        }
     });
 });
 
-router.get('/:id', (req, res) => {
-    const id = req.params.id;
-    if(id === 'secret') {
-        res.status(200).json({
-            message: 'Discovered!',
-            id: id
-        });
-    } else {
-        res.status(404).json({
-            message: 'Not Found'
-        });
-    }
+router.get('/:id', (req, res, next) => {
+    Product.findById(req.params.id, (err, product) => {
+        if(err) {
+            res.status(404).json({
+                error: err
+            });
+        } else {
+            res.send(product);
+        }
+    });
 });
 
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
     const product = {
         name: req.body.name,
+        category: req.body.category,
         price: req.body.price
-    }
-    res.status(201).json({
-        message: 'Product created',
-        product: product
+    };
+
+    new Product(product).save(err => {
+        if(err) {
+            res.status(404).json({
+                error: err
+            });
+        } else {
+            res.send('Product created successfully');
+        }
     });
 });
 
-router.put('/:id', (req, res) => {
-    res.status(200).json({
-        message: 'Product updated'
+router.put('/:id', (req, res, next) => {
+    Product.findByIdAndUpdate(req.params.id, {$set: req.body}, (err, product) => {
+        if(err) {
+            res.status(404).json({
+                error: err
+            });
+        } else {
+            res.send('Product updated successfully');
+        }
     });
 });
 
 router.delete('/:id', (req, res) => {
-    res.status(200).json({
-        message: 'Product deleted'
+    Product.findByIdAndRemove(req.params.id, err => {
+        if(err) {
+            res.status(404).json({
+                error: err
+            });
+        } else {
+            res.send('Product deleted successfully');
+        }
     });
 });
 
