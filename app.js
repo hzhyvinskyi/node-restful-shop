@@ -1,12 +1,21 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 const ordersRoutes = require('./api/routes/orders');
 const productRoutes = require('./api/routes/products');
+
+const db = require('./config/db');
+
+mongoose.connect(db.mongoURI, {
+    useNewUrlParser: true
+})
+  .then(() => console.log('MongoDB was successfully connected'))
+  .catch((err) => console.log(err));
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
