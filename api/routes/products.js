@@ -22,9 +22,14 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-    res.status(200).json({
-        message: 'Product created'
-    })
+    const product = {
+        name: req.body.name,
+        price: req.body.price
+    }
+    res.status(201).json({
+        message: 'Product created',
+        product: product
+    });
 });
 
 router.put('/:id', (req, res) => {

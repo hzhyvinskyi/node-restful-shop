@@ -22,8 +22,13 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-    res.status(200).json({
-        message: 'Order created'
+    const order = {
+        name: req.body.name,
+        quantity: req.body.quantity
+    }
+    res.status(201).json({
+        message: 'Order created',
+        order: order
     })
 });
 
