@@ -9,7 +9,7 @@ exports.index = (req, res) => {
         .exec((err, orders) => {
             if(err) {
                 res.status(404).json({
-                    error: err
+                    ...err
                 });
             } else {
                 res.status(200).json({
@@ -47,7 +47,7 @@ exports.show = (req, res) => {
         .exec((err, order) => {
         if(err) {
             res.status(404).json({
-                error: err
+                ...err
             });
         } else {
             res.status(200).json({
@@ -77,7 +77,7 @@ exports.store = (req, res) => {
     new Order(order).save((err, item) => {
         if(err) {
             res.status(404).json({
-                error: err
+                ...err
             });
         } else {
             res.status(201).json({
@@ -105,7 +105,7 @@ exports.update = (req, res) => {
         (err, order) => {
             if(err) {
                 res.status(404).json({
-                    error: err
+                    ...err
                 });
             } else {
                 res.status(200).json({
@@ -126,7 +126,7 @@ exports.destroy = (req, res) => {
     Order.findByIdAndRemove(req.params.id, err => {
         if(err) {
             res.status(404).json({
-                error: err
+                ...err
             });
         } else {
             res.status(200).json({

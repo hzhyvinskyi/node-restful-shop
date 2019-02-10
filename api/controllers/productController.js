@@ -6,7 +6,7 @@ exports.index = (req, res) => {
     Product.find((err, products) => {
         if(err) {
             res.status(404).json({
-                error: err
+                ...err
             });
         } else {
             res.status(200).json({
@@ -34,7 +34,7 @@ exports.show = (req, res) => {
     Product.findById(req.params.id, (err, product) => {
         if(err) {
             res.status(404).json({
-                error: err
+                ...err
             });
         } else {
             res.status(200).json({
@@ -60,7 +60,7 @@ exports.store = (req, res) => {
     new Product(product).save((err, item) => {
         if(err) {
             res.status(404).json({
-                error: err
+                ...err
             });
         } else {
             res.status(201).json({
@@ -76,7 +76,7 @@ exports.update = (req, res) => {
     Product.findByIdAndUpdate(req.params.id, {$set: req.body}, (err, product) => {
         if(err) {
             res.status(404).json({
-                error: err
+                ...err
             });
         } else {
             res.status(200).json({
@@ -91,7 +91,7 @@ exports.destroy = (req, res) => {
     Product.findByIdAndRemove(req.params.id, err => {
         if(err) {
             res.status(404).json({
-                error: err
+                ...err
             });
         } else {
             res.status(200).json({
