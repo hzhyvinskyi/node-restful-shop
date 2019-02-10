@@ -17,6 +17,7 @@ mongoose.connect(db.mongoURI, {
   .then(() => console.log('MongoDB was successfully connected'))
   .catch((err) => console.log(err));
 
+app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(morgan('dev'));

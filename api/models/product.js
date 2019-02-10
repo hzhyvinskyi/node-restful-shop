@@ -16,6 +16,9 @@ const ProductSchema = new Schema({
         type: Number,
         required: true
     },
+    image: {
+        type: String
+    },
     order: {
         type: Schema.Types.ObjectId,
         ref: 'Order'

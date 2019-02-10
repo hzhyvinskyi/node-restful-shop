@@ -17,9 +17,10 @@ exports.index = (req, res) => {
                         name: product.name,
                         price: product.price,
                         category: product.category,
+                        image: product.image ? req.protocol + '://' + req.get('host') + '/' + product.image : null,
                         request: {
                             type: req.method,
-                            url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + product.id,
+                            url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + product.id
                         }
                     }
                 })
@@ -40,7 +41,8 @@ exports.show = (req, res) => {
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                category: product.category
+                category: product.category,
+                image: product.image ? req.protocol + '://' + req.get('host') + '/' + product.image : null
             });
         }
     });
@@ -51,7 +53,8 @@ exports.store = (req, res) => {
     const product = {
         name: req.body.name,
         category: req.body.category,
-        price: req.body.price
+        price: req.body.price,
+        image: req.file.path
     };
 
     new Product(product).save((err, item) => {
