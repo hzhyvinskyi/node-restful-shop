@@ -15,13 +15,13 @@ exports.index = (req, res) => {
                     count: employees.length,
                     employees: employees.map(employee => {
                         return {
-                            id:employee.id,
-                            name:employee.name,
-                            avatar:employee.avatar,
-                            active:employee.active,
-                            department:employee.department,
-                            position:employee.position,
-                            skills:employee.skills,
+                            id: employee.id,
+                            name: employee.name,
+                            avatar: employee.avatar ? req.protocol + '://' + req.get('host') + '/' + employee.avatar : null,
+                            active: employee.active,
+                            department: employee.department,
+                            position: employee.position,
+                            skills: employee.skills,
                             request: {
                                 method: 'GET',
                                 url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee.id
@@ -46,7 +46,7 @@ exports.show = (req, res) => {
                 res.status(200).json({
                     id: employee.id,
                     name: employee.name,
-                    avatar: employee.avatar,
+                    avatar: employee.avatar ? req.protocol + '://' + req.get('host') + '/' + employee.avatar : null,
                     active: employee.active,
                     department: employee.department,
                     position: employee.position,
@@ -61,7 +61,7 @@ exports.store = (req, res) => {
     const employee = {
         id: req.body.id,
         name: req.body.name,
-        avatar: req.body.avatar,
+        avatar: req.file.path,
         active: req.body.active,
         department: req.body.department,
         position: req.body.position,
@@ -79,7 +79,7 @@ exports.store = (req, res) => {
                 employee: {
                     id: item.id,
                     name: item.name,
-                    avatar: item.avatar,
+                    avatar: item.avatar ? req.protocol + '://' + req.get('host') + '/' + item.avatar : null,
                     active: item.active,
                     department: item.department,
                     position: item.position,

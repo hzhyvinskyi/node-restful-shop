@@ -6,9 +6,10 @@ const mongoose = require('mongoose');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const employeeRoutes = require('./api/routes/employees');
+const employeesRoutes = require('./api/routes/employees');
 const ordersRoutes = require('./api/routes/orders');
-const productRoutes = require('./api/routes/products');
+const productsRoutes = require('./api/routes/products');
+const usersRoutes = require('./api/routes/users');
 
 const db = require('./config/db');
 
@@ -39,9 +40,10 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/employees', employeeRoutes);
+app.use('/employees', employeesRoutes);
 app.use('/orders', ordersRoutes);
-app.use('/products', productRoutes);
+app.use('/products', productsRoutes);
+app.use('/users', usersRoutes);
 
 app.use((req, res, next) => {
     if(req.originalUrl && req.originalUrl.split('/').pop() === 'favicon.ico') {
