@@ -1,7 +1,7 @@
-// Load Product Model
+// Load Employee Model
 const Employee = require('../models/employee');
 
-// Employee list
+// Employee List
 exports.index = (req, res) => {
     Employee.find()
         .select('id name avatar active department position skills')
