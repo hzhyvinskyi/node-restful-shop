@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const checkAuth = require('../middlewares/checkAuth');
 
 const productController = require('../controllers/productController');
 
@@ -9,10 +10,10 @@ router.get('/', productController.index);
 
 router.get('/:id', productController.show);
 
-router.post('/', upload.single('image'), productController.store);
+router.post('/', checkAuth, upload.single('image'), productController.store);
 
-router.put('/:id', productController.update);
+router.put('/:id', checkAuth, productController.update);
 
-router.delete('/:id', productController.destroy);
+router.delete('/:id', checkAuth, productController.destroy);
 
 module.exports = router;
