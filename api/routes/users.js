@@ -7,6 +7,8 @@ router.get('/', userController.index);
 
 router.get('/:id', userController.show);
 
+router.post('/login', userController.login);
+
 router.post('/signup', userController.register);
 
 router.delete('/:id', userController.delete);
