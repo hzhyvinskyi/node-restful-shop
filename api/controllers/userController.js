@@ -165,6 +165,34 @@ exports.register = (req, res) => {
     });
 };
 
+exports.update = (req, res) => {
+    User.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        (err, user) => {
+            if(err) {
+                res.status(404).json({
+                    ...err
+                });
+            }
+            if(user) {
+                res.status(200).json({
+                    message: 'User updated successfull',
+                    user: {
+                        id: user.id,
+                        name: req.body.name || user.name,
+                        email: req.body.email || user.email,
+                        request: {
+                            method: 'GET',
+                            url: req.protocol + '://' + req.get('host') + '/users/' + user.id
+                        }
+                    }
+                });
+            }
+        }
+    );
+}
+
 exports.delete = (req, res) => {
     User.findByIdAndRemove(req.params.id, err => {
         if(err) {
