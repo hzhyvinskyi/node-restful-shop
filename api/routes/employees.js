@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const checkAuth = require('../middlewares/checkAuth');
 
 const employeeController = require('../controllers/employeeController');
 
@@ -9,10 +10,10 @@ router.get('/', employeeController.index);
 
 router.get('/:id', employeeController.show);
 
-router.post('/', upload.single('avatar'), employeeController.store);
+router.post('/', checkAuth, upload.single('avatar'), employeeController.store);
 
-router.put('/:id', employeeController.update);
+router.put('/:id', checkAuth, employeeController.update);
 
-router.delete('/:id', employeeController.destroy);
+router.delete('/:id', checkAuth, employeeController.destroy);
 
 module.exports = router;
