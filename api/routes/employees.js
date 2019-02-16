@@ -12,7 +12,7 @@ router.get('/:id', employeeController.show);
 
 router.post('/', checkAuth, upload.single('avatar'), employeeController.store);
 
-router.put('/:id', checkAuth, employeeController.update);
+router.put('/:id', checkAuth, upload.single('avatar'), employeeController.update);
 
 router.delete('/:id', checkAuth, employeeController.destroy);
 

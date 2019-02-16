@@ -9,7 +9,7 @@ const Skill = require('../models/employee/skill');
 exports.index = (req, res) => {
     Employee.
         find().
-        populate('department.sphere position.rank skills.technology').
+        populate('department.sphere position.rank skills.technologies').
         exec((err, employees) => {
             if(err) {
                 res.status(404).json({
@@ -24,9 +24,9 @@ exports.index = (req, res) => {
                         name: employee.name,
                         avatar: employee.avatar ? req.protocol + '://' + req.get('host') + '/' + employee.avatar : null,
                         active: employee.active,
-                        department: employee.department,
-                        position: employee.position,
-                        skills: employee.skills,
+                        department: employee.department[0],
+                        position: employee.position[0],
+                        skills: employee.skills[0],
                         request: {
                             method: 'GET',
                             url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee.id
@@ -62,13 +62,12 @@ exports.show = (req, res) => {
 
 // Employee Save
 exports.store = (req, res) => {
-    const employee = new Employee({
+    new Employee({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
         avatar: req.file.path,
         active: req.body.active
-    });
-    employee.save(err => {
+    }).save((err, employee) => {
         if(err) {
             res.status(404).json({
                 ...err
@@ -94,11 +93,11 @@ exports.store = (req, res) => {
                         ...err
                     });
                 }
-                const skill = new Skill({
+                const skills = new Skill({
                     employee: employee._id,
-                    technology: req.body.technology
+                    technologies: req.body.technologies
                 });
-                skill.save(err => {
+                skills.save(err => {
                     if(err) {
                         res.status(404).json({
                             ...err
@@ -106,7 +105,7 @@ exports.store = (req, res) => {
                     }
                     employee.department.push(department);
                     employee.position.push(position);
-                    employee.skills.push(skill);
+                    employee.skills.push(skills);
                     employee.save(err => {
                         if(err) {
                             res.status(404).json({
@@ -138,82 +137,91 @@ exports.store = (req, res) => {
 
 // Employee Update
 exports.update = (req, res) => {
-    Employee.findByIdAndUpdate(
-        req.params.id,
-        {
-            name: req.body.name,
-            avatar: req.file.path,
-            active: req.body.active
-        },
-        (err, employee) => {
-        if(err) {
-            res.status(404).json({
-                ...err
-            });
-        }
-        Department.findOne({employee: employee.id}, (err, department) => {
-            if(err) {
-                res.status(404).json({
-                    ...err
-                }); 
-            }
-            department.update(req.body.sphere, err => {
+    Employee.
+        findByIdAndUpdate(
+            req.params.id,
+            {
+                name: req.body.name,
+                avatar: req.file.path,
+                active: req.body.active
+            },
+            (err, employee) => {
                 if(err) {
                     res.status(404).json({
                         ...err
-                    }); 
+                    });
                 }
-            });
-        });
-        Position.findOne({employee: employee.id}, (err, position) => {
-            if(err) {
-                res.status(404).json({
-                    ...err
-                }); 
-            }
-            position.update(req.body.position, err => {
-                if(err) {
-                    res.status(404).json({
-                        ...err
-                    }); 
-                }
-            });
-        });
-        Skill.find({id: employee.id}, (err, skills) => {
-            if(err) {
-                res.status(404).json({
-                    ...err
-                }); 
-            }
-            let i = 0;
-            for(skill in skills) {
-                skill.update(req.body.skill[i], err => {
-                    if(err) {
-                        res.status(404).json({
-                            ...err
-                        }); 
+                Department.findOneAndUpdate(
+                    {employee: employee.id},
+                    {$set: {
+                        id: employee.department.id,
+                        employee: employee.id,
+                        sphere: req.body.sphere
+                    }},
+                    (err, department) => {
+                        if(err) {
+                            res.status(404).json({
+                                ...err
+                            }); 
+                        }
+                        Position.findOneAndUpdate(
+                            {employee: employee.id},
+                            {$set: {
+                                id: employee.position.id,
+                                employee: employee.id,
+                                rank: req.body.rank
+                            }},
+                            (err, position) => {
+                                if(err) {
+                                    res.status(404).json({
+                                        ...err
+                                    }); 
+                                }
+                                Skill.findOneAndUpdate({employee: employee.id}, {$set: {
+                                    id: employee.skills.id,
+                                    employee: employee.id,
+                                    technologies: req.body.technologies
+                                }}, (err, skills) => {
+                                    if(err) {
+                                        res.status(404).json({
+                                            ...err
+                                        }); 
+                                    }
+                                    res.status(200).json({
+                                        message: 'Employee updated successfully',
+                                        employee: {
+                                            id: req.params.id,
+                                            name: req.body.name || employee.name,
+                                            avatar: req.file.path || employee.avatar,
+                                            active: req.body.active || employee.active,
+                                            department: {
+                                                id: department.id,
+                                                employeeId: department.employee,
+                                                sphere: department.sphere
+                                            } || employee.department,
+                                            position: {
+                                                id: position.id,
+                                                employeeId: position.employee,
+                                                rank: position.rank
+                                            } || employee.position,
+                                            skills: {
+                                                id: skills.id,
+                                                employeeId: employee.id,
+                                                technologies: req.body.technologies
+                                            } || employee.skills,
+                                            request: {
+                                                method: 'GET',
+                                                url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee.id
+                                            }
+                                        }
+                                    });
+                                });
+                            }
+                        );
                     }
-                });
-                ++i;
+                );
             }
-        });
-        res.status(200).json({
-            message: 'Employee updated successfully',
-            employee: {
-                id: req.params.id,
-                name: req.body.name || employee.name,
-                avatar: req.file.path || employee.avatar,
-                active: req.body.active || employee.active,
-                department: req.body.department || employee.department,
-                position: req.body.position || employee.position,
-                skills: req.body.skills || employee.skills,
-                request: {
-                    method: 'GET',
-                    url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee.id
-                }
-            }
-        });
-    });
+        );        
 }
 
 // Employee Delete
@@ -225,58 +233,29 @@ exports.destroy = (req, res) => {
                     ...err
                 });
             }
-            Department.findOne({employee: employee.id}, (err, department) => {
+            Department.findOneAndDelete({employee: employee.id}, (err, department) => {
                 if(err) {
                     res.status(404).json({
                         ...err
                     }); 
                 }
-                department.remove(err => {
+                Position.findOneAndDelete({employee: employee.id}, (err, position) => {
                     if(err) {
                         res.status(404).json({
                             ...err
                         }); 
                     }
-                });
-            });
-            Position.findOne({employee: employee.id}, (err, position) => {
-                if(err) {
-                    res.status(404).json({
-                        ...err
-                    }); 
-                }
-                position.remove(err => {
-                    if(err) {
-                        res.status(404).json({
-                            ...err
-                        }); 
-                    }
-                });
-            });
-            Skill.find({id: employee.id}, (err, skills) => {
-                if(err) {
-                    res.status(404).json({
-                        ...err
-                    }); 
-                }
-                for(skill in skills) {
-                    skill.remove(err => {
+                    Skill.findOneAndDelete({employee: employee.id}, (err, skills) => {
                         if(err) {
                             res.status(404).json({
                                 ...err
-                            }); 
+                            });
                         }
+                        employee.remove()
+                        res.status(200).json({
+                            message: 'Employee deleted successfully'
+                        });
                     });
-                }
-            });
-            employee.remove(err => {
-                if(err) {
-                    res.status(404).json({
-                        ...err
-                    }); 
-                }
-                res.status(200).json({
-                    message: 'Employee deleted successfully'
                 });
             });
         });

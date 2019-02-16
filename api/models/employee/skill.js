@@ -7,10 +7,10 @@ const skillSchema = new Schema({
         ref: 'employee',
         required: true
     },
-    technology: {
+    technologies: [{
         type: String,
         required: true
-    }
+    }]
 });
 
 module.exports = mongoose.model('Skill', skillSchema);
