@@ -4,12 +4,15 @@ const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.index = (req, res) => {
-    User.find()
-        .select('id name email password createdAt updatedAt')
+    User.
+        find().
+        select('id name email password createdAt updatedAt')
         .exec((err, users) => {
             if(err) {
                 res.status(404).json({
-                    ...err
+                    error: {
+                        message: err.message
+                    }
                 });
             } else {
                 res.status(200).json({
@@ -19,7 +22,6 @@ exports.index = (req, res) => {
                             id: user.id,
                             name: user.name,
                             email: user.email,
-                            password: user.password,
                             registered: user.createdAt,
                             updated: user.updatedAt
                         }
@@ -32,17 +34,24 @@ exports.index = (req, res) => {
 exports.show = (req, res) => {
     User.findById(req.params.id, (err, user) => {
         if(err) {
-            res.status(404).json({
-                ...err
+            res.status(400).json({
+                error: {
+                    message: err.message
+                }
             });
-        } else {
+        } else if(user) {
             res.status(200).json({
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                password: user.password,
                 registered: user.createdAt,
                 updated: user.updatedAt
+            });
+        } else {
+            res.status(404).json({
+                error: {
+                    message: 'Page Not Found'
+                }
             });
         }
     });
@@ -52,25 +61,25 @@ exports.login = (req, res) => {
     User.findOne({email: req.body.email}, (err, user) => {
         if(err) {
             res.status(404).json({
-                ...err
+                error: {
+                    message: err.message
+                }
             });
-        }
-        if(!user) {
+        } else if(!user) {
             res.status(401).json({
                 error: {
                     message: 'Auth failed'
                 }
             });
         } else {
-            bcryptjs.compare(req.body.password, user.password, (err, result) => {
+            bcryptjs.compare(req.body.password, user.password, (err, success) => {
                 if(err) {
                     res.status(401).json({
                         error: {
                             message: 'Auth failed'
                         }
                     });
-                }
-                if(result) {
+                } else if(success) {
                     jwt.sign(
                         {
                             email: user.email,
@@ -85,8 +94,7 @@ exports.login = (req, res) => {
                                 res.status(401).json({
                                     message: 'Auth failed'
                                 });
-                            }
-                            if(token) {
+                            } else if(token) {
                                 res.status(404).json({
                                     message: 'Auth successful',
                                     token: token
@@ -118,14 +126,13 @@ exports.register = (req, res) => {
             res.status(404).json({
                 ...err
             });
-        }
-        if(user) {
+        } else if(user) {
             res.status(409).json({
                 error: {
                     message: 'Email already exists'
                 }
             });
-        } else if (req.body.password.length < 8) {
+        } else if(req.body.password.length < 8) {
             res.status(400).json({
                 error: {
                     message: 'Password must contain at least 8 characters'
@@ -135,10 +142,11 @@ exports.register = (req, res) => {
             bcryptjs.hash(req.body.password, 10, (err, hash) => {
                 if(err) {
                     res.status(422).json({
-                        ...err
+                        error: {
+                            message: err.message
+                        }
                     });
-                }
-                if(hash) {
+                } else if(hash) {
                     new User({
                         name: req.body.name,
                         email: req.body.email,
@@ -146,7 +154,9 @@ exports.register = (req, res) => {
                     }).save(err => {
                         if(err) {
                             res.status(404).json({
-                                ...err
+                                error: {
+                                    message: err.message
+                                }
                             });
                         } else {
                             res.status(201).json({
@@ -157,7 +167,9 @@ exports.register = (req, res) => {
                     });
                 } else {
                     res.status(422).json({
-                        ...err
+                        error: {
+                            message: err.message
+                        }
                     });
                 }
             });
@@ -166,15 +178,18 @@ exports.register = (req, res) => {
 };
 
 exports.delete = (req, res) => {
-    User.findByIdAndRemove(req.params.id, err => {
-        if(err) {
-            res.status(404).json({
-                ...err
-            });
-        } else {
-            res.status(200).json({
-                message: 'User deleted successfully'
-            });
-        }
-    });
+    User.
+        findByIdAndRemove(req.params.id, err => {
+            if(err) {
+                res.status(404).json({
+                    error: {
+                        message: err.message
+                    }
+                });
+            } else {
+                res.status(200).json({
+                    message: 'User deleted successfully'
+                });
+            }
+        });
 };

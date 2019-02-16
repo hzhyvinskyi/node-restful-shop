@@ -23,7 +23,10 @@ mongoose.connect(db.mongoURI, {
 app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-app.use(morgan('dev'));
+
+if(process.env.NODE_ENV !== 'test') {
+    app.use(morgan('dev'));
+}
 
 app.use((req, res, next) => {
     req.header('Access-Control-Allow-Origin', '*');
@@ -71,3 +74,6 @@ app.use((error, req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+// For testing
+module.exports = app;

@@ -17,10 +17,12 @@ const employeeSchema = new Schema({
     department: [{
         type: Schema.Types.ObjectId,
         ref: 'Department',
+        required: true
     }],
     position: [{
         type: Schema.Types.ObjectId,
         ref: 'Position',
+        required: true
     }],
     skills: [{
         type: Schema.Types.ObjectId,
