@@ -57,6 +57,10 @@ describe('Emlpoyees', () => {
             post('/users/register').
             send(user).
             end((err, res) => {
+                res.should.have.status(201);
+                res.body.should.be.a('object');
+                Object.keys(res.body).length.should.eql(1);
+                res.body.should.have.property('message');
                 chai.request(app).
                 post('/users/login').
                 send({
@@ -64,6 +68,11 @@ describe('Emlpoyees', () => {
                     password: user.password
                 }).
                 end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    Object.keys(res.body).length.should.eql(2);
+                    res.body.should.have.property('message').eql('Auth successful');
+                    res.body.should.have.property('token');
                     const token = res.body.token;
                     chai.request(app).
                     post('/employees').
@@ -99,6 +108,10 @@ describe('Emlpoyees', () => {
             post('/users/register').
             send(user).
             end((err, res) => {
+                res.should.have.status(201);
+                res.body.should.be.a('object');
+                Object.keys(res.body).length.should.eql(1);
+                res.body.should.have.property('message');
                 chai.request(app).
                 post('/users/login').
                 send({
@@ -106,6 +119,11 @@ describe('Emlpoyees', () => {
                     password: user.password
                 }).
                 end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    Object.keys(res.body).length.should.eql(2);
+                    res.body.should.have.property('message').eql('Auth successful');
+                    res.body.should.have.property('token');
                     const token = res.body.token;
                     const {active, sphere, rank, technologies} = employee;
                     chai.request(app).
@@ -127,6 +145,10 @@ describe('Emlpoyees', () => {
             post('/users/register').
             send(user).
             end((err, res) => {
+                res.should.have.status(201);
+                res.body.should.be.a('object');
+                Object.keys(res.body).length.should.eql(1);
+                res.body.should.have.property('message');
                 chai.request(app).
                 post('/users/login').
                 send({
@@ -134,6 +156,11 @@ describe('Emlpoyees', () => {
                     password: user.password
                 }).
                 end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    Object.keys(res.body).length.should.eql(2);
+                    res.body.should.have.property('message').eql('Auth successful');
+                    res.body.should.have.property('token');
                     const token = res.body.token;
                     chai.request(app).
                     post('/employees').
@@ -177,6 +204,11 @@ describe('Emlpoyees', () => {
                     password: user.password
                 }).
                 end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    Object.keys(res.body).length.should.eql(2);
+                    res.body.should.have.property('message').eql('Auth successful');
+                    res.body.should.have.property('token');
                     const token = res.body.token;
                     chai.request(app).
                     post('/employees').
@@ -235,6 +267,11 @@ describe('Emlpoyees', () => {
                     password: user.password
                 }).
                 end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    Object.keys(res.body).length.should.eql(2);
+                    res.body.should.have.property('message').eql('Auth successful');
+                    res.body.should.have.property('token');
                     const token = res.body.token;
                     chai.request(app).
                     post('/employees').
