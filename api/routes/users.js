@@ -10,7 +10,7 @@ router.get('/:id', userController.show);
 
 router.post('/login', userController.login);
 
-router.post('/signup', userController.register);
+router.post('/register', userController.register);
 
 router.delete('/:id', checkAuth, userController.delete);
 

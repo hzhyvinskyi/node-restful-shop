@@ -95,7 +95,7 @@ exports.login = (req, res) => {
                                     message: 'Auth failed'
                                 });
                             } else if(token) {
-                                res.status(404).json({
+                                res.status(200).json({
                                     message: 'Auth successful',
                                     token: token
                                 });
@@ -153,7 +153,7 @@ exports.register = (req, res) => {
                         password: hash
                     }).save(err => {
                         if(err) {
-                            res.status(404).json({
+                            res.status(400).json({
                                 error: {
                                     message: err.message
                                 }
