@@ -10,7 +10,7 @@ const Skill = require('../models/employee/skill');
 exports.index = (req, res) => {
     Employee.
         find().
-        populate('department.sphere position.rank skills.technologies').
+        populate('department position skills').
         exec((err, employees) => {
             if(err) {
                 res.status(404).json({
@@ -27,9 +27,9 @@ exports.index = (req, res) => {
                             name: employee.name,
                             avatar: employee.avatar ? req.protocol + '://' + req.get('host') + '/' + employee.avatar : null,
                             active: employee.active,
-                            departmentId: employee.department[0],
-                            positionId: employee.position[0],
-                            skillsId: employee.skills[0],
+                            department: employee.department,
+                            position: employee.position,
+                            skills: employee.skills,
                             request: {
                                 method: 'GET',
                                 url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee.id
@@ -73,7 +73,7 @@ exports.store = (req, res) => {
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
         avatar: req.file ? req.file.path : null,
-        active: req.body.active
+        active: !!Number(req.body.active)
     }).save((err, employee) => {
         if(err) {
             res.status(400).json({
