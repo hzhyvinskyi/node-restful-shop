@@ -29,17 +29,17 @@ if(process.env.NODE_ENV !== 'test') {
 }
 
 app.use((req, res, next) => {
-    req.header('Access-Control-Allow-Origin', '*');
-    req.header(
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header(
         'Access-Control-Allow-Headers',
-        'Accept, Authorization, Content-Type, Origin, X-Requested-With'
+        'Accept, Authorization, Content-Type, Origin, X-Requested-With, Cache-Control'
     );
     if(req.method === 'OPTIONS') {
-        req.header(
+        res.header(
             'Access-Control-Allow-Methods',
             'GET, POST, PUT, PATCH, DELETE'
         );
-        return req.status(200).json({});
+        return res.status(200).json({});
     }
     next();
 });
