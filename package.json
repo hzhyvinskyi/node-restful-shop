@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon app",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ./tests/*"
   },
   "keywords": [],
   "author": "",
@@ -17,10 +17,13 @@
     "express": "^4.16.4",
     "jsonwebtoken": "^8.4.0",
     "mkdirp": "^0.5.1",
-    "mongoose": "^5.4.10",
+    "mongoose": "^5.4.13",
     "multer": "^1.4.1"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.1",
+    "mocha": "^5.2.0",
     "morgan": "^1.9.1",
     "nodemon": "^1.18.10"
   }

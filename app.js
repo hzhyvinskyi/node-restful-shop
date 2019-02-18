@@ -23,20 +23,23 @@ mongoose.connect(db.mongoURI, {
 app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-app.use(morgan('dev'));
+
+if(process.env.NODE_ENV !== 'test') {
+    app.use(morgan('dev'));
+}
 
 app.use((req, res, next) => {
-    req.header('Access-Control-Allow-Origin', '*');
-    req.header(
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header(
         'Access-Control-Allow-Headers',
-        'Accept, Authorization, Content-Type, Origin, X-Requested-With'
+        'Accept, Authorization, Content-Type, Origin, X-Requested-With, Cache-Control'
     );
     if(req.method === 'OPTIONS') {
-        req.header(
+        res.header(
             'Access-Control-Allow-Methods',
             'GET, POST, PUT, PATCH, DELETE'
         );
-        return req.status(200).json({});
+        return res.status(200).json({});
     }
     next();
 });
@@ -71,3 +74,6 @@ app.use((error, req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+// For testing
+module.exports = app;
