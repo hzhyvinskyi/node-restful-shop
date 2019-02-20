@@ -7,11 +7,9 @@ const Position = require('../models/employee/position');
 const Skill = require('../models/employee/skill');
 
 // Employee List
-exports.index = (req, res) => {
-    Employee
-    .find()
-    .populate('department position skills')
-    .then(employees => {
+exports.index = async (req, res) => {
+    try {
+        const employees = await Employee.find().populate('department position skills');
         res.status(200).json({
             count: employees.length,
             employees: employees.map(employee => {
@@ -29,23 +27,20 @@ exports.index = (req, res) => {
                     }
                 }
             })
-        });
-    })
-    .catch(err => {
+        })
+    } catch(err) {
         res.status(404).json({
             error: {
                 message: err.message
             }
         });
-    });
+    }
 };
 
 // Employee Details
-exports.show = (req, res) => {
-    Employee
-    .findById(req.params.id)
-    .populate('department position skills')
-    .then(employee => {
+exports.show = async (req, res) => {
+    try {
+        const employee = await Employee.findById(req.params.id).populate('department position skills');
         res.status(200).json({
             id: employee.id,
             name: employee.name,
@@ -55,44 +50,42 @@ exports.show = (req, res) => {
             position: employee.position,
             skills: employee.skills
         });
-    })
-    .catch(err => {
+    } catch(err) {
         res.status(404).json({
             error: {
                 message: err.message
             }
         });
-    });
+    }
 };
 
 // Employee Save
-exports.store = (req, res) => {
-    new Employee({
+exports.store = async (req, res) => {
+    const employee =  new Employee({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
         avatar: req.file ? req.file.path : null,
         active: !!Number(req.body.active)
-    }).save()
-    .then(employee => {
-        const department = new Department({
-            employee: employee._id,
-            sphere: req.body.sphere
-        });    
-        const position = new Position({
-            employee: employee._id,
-            rank: req.body.rank
-        });
-        const skills = new Skill({
-            employee: employee._id,
-            technologies: req.body.technologies
-        });
+    })
+    const department = new Department({
+        employee: employee._id,
+        sphere: req.body.sphere
+    });    
+    const position = new Position({
+        employee: employee._id,
+        rank: req.body.rank
+    });
+    const skills = new Skill({
+        employee: employee._id,
+        technologies: req.body.technologies
+    });
+    try {
         employee.department.push(department);
         employee.position.push(position);
         employee.skills.push(skills);
 
-        return employee.save()
-    })
-    .then(employee => {
+        await employee.save();
+        
         res.status(201).json({
             message: 'Employee created successfully',
             employee: {
@@ -109,30 +102,30 @@ exports.store = (req, res) => {
                 }
             }
         });
-    })
-    .catch(err => {
+    } catch(err) {
         res.status(400).json({
             error: {
                 message: err.message
             }
         });
-    });
+    }
 };
 
 // Employee Update
-exports.update = (req, res) => {
-    Employee
-    .findByIdAndUpdate(
-        req.params.id,
-        {
-            name: req.body.name,
-            avatar: req.file ? req.file.path : null,
-            active: req.body.active
-        }
-    )
-    .then(employee => {
-        const department = Department.findOneAndUpdate(
-            {employee: employee.id},
+exports.update = async (req, res) => {
+    try {
+        const employee = await Employee.findByIdAndUpdate(
+            req.params.id,
+            {
+                name: req.body.name,
+                avatar: req.file ? req.file.path : null,
+                active: req.body.active
+            }
+        );
+        const department = await Department.findOneAndUpdate(
+            {
+                employee: employee.id
+            },
             {
                 $set: {
                     id: employee.department.id,
@@ -141,16 +134,22 @@ exports.update = (req, res) => {
                 }
             }
         );
-        const position = Position.findOneAndUpdate(
-            {employee: employee.id},
-            {$set: {
-                id: employee.position.id,
-                employee: employee.id,
-                rank: req.body.rank
-            }}
+        const position = await Position.findOneAndUpdate(
+            {
+                employee: employee.id
+            },
+            {
+                $set: {
+                    id: employee.position.id,
+                    employee: employee.id,
+                    rank: req.body.rank
+                }
+            }
         );
-        const skills = Skill.findOneAndUpdate(
-            {employee: employee.id},
+        const skills = await Skill.findOneAndUpdate(
+            {
+                employee: employee.id
+            },
             {
                 $set: {
                     id: employee.skills.id,
@@ -159,10 +158,6 @@ exports.update = (req, res) => {
                 }
             }
         );
-
-        return Promise.all([employee, department, position, skills]);
-    })
-    .then(([employee, department, position, skills]) => {
         res.status(200).json({
             message: 'Employee updated successfully',
             employee: {
@@ -191,36 +186,33 @@ exports.update = (req, res) => {
                 }
             }
         });
-    })
-    .catch(err => {
+    } catch(err) {
         res.status(404).json({
             error: {
                 message: err.message
             }
         });
-    });   
+    }
 }
 
 // Employee Delete
-exports.destroy = (req, res) => {
-    Employee
-    .findById(req.params.id)
-    .then(employee => {
-        Department.findOneAndDelete({employee: employee.id})
-        Position.findOneAndDelete({employee: employee.id})
-        Skill.findOneAndDelete({employee: employee.id})
+exports.destroy = async (req, res) => {
+    try {
+        const employee = await Employee.findById(req.params.id);
+        await Department.findOneAndDelete({employee: employee.id});
+        await Position.findOneAndDelete({employee: employee.id});
+        await Skill.findOneAndDelete({employee: employee.id});
 
         if(employee.remove()) {
             res.status(200).json({
                 message: 'Employee deleted successfully'
             });
         }
-    })
-    .catch(err => {
+    } catch(err) {
         res.status(404).json({
             errors: {
                 message: err.message
             }
         });
-    });
+    }
 };
