@@ -26,7 +26,7 @@ const user = {
     password: 'testZ345test-'
 }
 
-describe('Emlpoyees', () => {
+describe('Employees', () => {
     beforeEach(done => {
         Employee.remove({}, err => {
             User.remove({}, err => {
