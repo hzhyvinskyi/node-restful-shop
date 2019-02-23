@@ -2,14 +2,14 @@ const mongoose = require('mongoose');
 
 // Load Relative Model
 const Employee = require('../models/employee/employee');
-const Department = require('../models/employee/department');
-const Position = require('../models/employee/position');
-const Skill = require('../models/employee/skill');
+const {Department} = require('../models/employee/department');
+const {Position} = require('../models/employee/position');
+const {Skill} = require('../models/employee/skill');
 
 // Employee List
 exports.index = async (req, res) => {
     try {
-        const employees = await Employee.find().populate('department position skills');
+        const employees = await Employee.find().sort('name');
         res.status(200).json({
             count: employees.length,
             employees: employees.map(employee => {
@@ -61,31 +61,29 @@ exports.show = async (req, res) => {
 
 // Employee Save
 exports.store = async (req, res) => {
-    const employee =  new Employee({
-        _id: new mongoose.Types.ObjectId(),
-        name: req.body.name,
-        avatar: req.file ? req.file.path : null,
-        active: !!Number(req.body.active)
-    })
-    const department = new Department({
-        employee: employee._id,
-        sphere: req.body.sphere
-    });    
-    const position = new Position({
-        employee: employee._id,
-        rank: req.body.rank
-    });
-    const skills = new Skill({
-        employee: employee._id,
-        technologies: req.body.technologies
-    });
     try {
-        employee.department.push(department);
-        employee.position.push(position);
-        employee.skills.push(skills);
-
+        const department = await Department.findById(req.body.departmentId);
+        const position = await Position.findById(req.body.positionId);
+        const skills = await Skill.find({
+            _id: {
+                $in: req.body.skills
+            }
+        });
+        const employee =  new Employee({
+            name: req.body.name,
+            avatar: req.file ? req.file.path : null,
+            active: !!Number(req.body.active),
+            department: {
+                _id: department._id,
+                name: department.name
+            },
+            position: {
+                _id: position._id,
+                name: position.name
+            },
+            skills: skills
+        });
         await employee.save();
-        
         res.status(201).json({
             message: 'Employee created successfully',
             employee: {
@@ -114,48 +112,28 @@ exports.store = async (req, res) => {
 // Employee Update
 exports.update = async (req, res) => {
     try {
+        const department = await Department.findById(req.body.departmentId);
+        const position = await Position.findById(req.body.positionId);
+        const skills = await Skill.find({
+            _id: {
+                $in: req.body.skills
+            }
+        });
         const employee = await Employee.findByIdAndUpdate(
             req.params.id,
             {
                 name: req.body.name,
                 avatar: req.file ? req.file.path : null,
-                active: req.body.active
-            }
-        );
-        const department = await Department.findOneAndUpdate(
-            {
-                employee: employee.id
-            },
-            {
-                $set: {
-                    id: employee.department.id,
-                    employee: employee.id,
-                    sphere: req.body.sphere
-                }
-            }
-        );
-        const position = await Position.findOneAndUpdate(
-            {
-                employee: employee.id
-            },
-            {
-                $set: {
-                    id: employee.position.id,
-                    employee: employee.id,
-                    rank: req.body.rank
-                }
-            }
-        );
-        const skills = await Skill.findOneAndUpdate(
-            {
-                employee: employee.id
-            },
-            {
-                $set: {
-                    id: employee.skills.id,
-                    employee: employee.id,
-                    technologies: req.body.technologies
-                }
+                active: req.body.active,
+                department: {
+                    _id: department._id,
+                    name: department.name
+                },
+                position: {
+                    _id: position._id,
+                    name: position.name
+                },
+                skills: skills
             }
         );
         res.status(200).json({
@@ -165,21 +143,9 @@ exports.update = async (req, res) => {
                 name: req.body.name || employee.name,
                 avatar: req.file ? req.file.path : employee.avatar,
                 active: req.body.active || employee.active,
-                department: {
-                    id: department.id,
-                    employeeId: department.employee,
-                    sphere: department.sphere
-                } || employee.department,
-                position: {
-                    id: position.id,
-                    employeeId: position.employee,
-                    rank: position.rank
-                } || employee.position,
-                skills: {
-                    id: skills.id,
-                    employeeId: employee.id,
-                    technologies: req.body.technologies
-                } || employee.skills,
+                department: req.body.department || employee.department,
+                position: req.body.position || employee.position,
+                skills: skills || employee.skills,
                 request: {
                     method: 'GET',
                     url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee.id
@@ -198,16 +164,10 @@ exports.update = async (req, res) => {
 // Employee Delete
 exports.destroy = async (req, res) => {
     try {
-        const employee = await Employee.findById(req.params.id);
-        await Department.findOneAndDelete({employee: employee.id});
-        await Position.findOneAndDelete({employee: employee.id});
-        await Skill.findOneAndDelete({employee: employee.id});
-
-        if(employee.remove()) {
-            res.status(200).json({
-                message: 'Employee deleted successfully'
-            });
-        }
+        await Employee.findByIdAndDelete(req.params.id);
+        res.status(200).json({
+            message: 'Employee deleted successfully'
+        });
     } catch(err) {
         res.status(404).json({
             errors: {

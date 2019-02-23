@@ -10,10 +10,10 @@ router.get('/', employeeController.index);
 
 router.get('/:id', employeeController.show);
 
-router.post('/', checkAuth, upload.single('avatar'), employeeController.store);
+router.post('/', upload.single('avatar'), employeeController.store);
 
-router.put('/:id', checkAuth, upload.single('avatar'), employeeController.update);
+router.put('/:id', upload.single('avatar'), employeeController.update);
 
-router.delete('/:id', checkAuth, employeeController.destroy);
+router.delete('/:id', employeeController.destroy);
 
 module.exports = router;

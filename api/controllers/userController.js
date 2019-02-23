@@ -49,7 +49,21 @@ exports.show = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const user = await User.findOne({email: req.body.email});
-        await bcryptjs.compare(req.body.password, user.password);
+        if(!user) {
+            return res.status(400).json({
+                error: {
+                    message: 'Invalid credentials'
+                }
+            });
+        }
+        const validPassword = await bcryptjs.compare(req.body.password, user.password);
+        if(!validPassword) {
+            return res.status(400).json({
+                error: {
+                    message: 'Invalid credentials'
+                }
+            });
+        }
         const token = await jwt.sign({email: user.email, id: user.id}, process.env.JWT_KEY, {expiresIn: '12h'});
         res.status(200).json({
             message: 'Auth successful',
