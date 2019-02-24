@@ -14,6 +14,7 @@ const skillsRoutes = require('./api/routes/employees/skills');
 const ordersRoutes = require('./api/routes/orders');
 const productsRoutes = require('./api/routes/products');
 const usersRoutes = require('./api/routes/users');
+const authRoutes = require('./api/routes/auth');
 
 const db = require('./config/db');
 
@@ -54,6 +55,7 @@ app.use('/skills', skillsRoutes);
 app.use('/orders', ordersRoutes);
 app.use('/products', productsRoutes);
 app.use('/users', usersRoutes);
+app.use('/auth', authRoutes);
 
 app.use((req, res, next) => {
     if(req.originalUrl && req.originalUrl.split('/').pop() === 'favicon.ico') {

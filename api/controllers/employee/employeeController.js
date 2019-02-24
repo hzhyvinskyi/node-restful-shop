@@ -1,6 +1,4 @@
-const mongoose = require('mongoose');
-
-// Load Relative Model
+// Load Relative Models
 const Employee = require('../../models/employee/employee');
 const {Department} = require('../../models/employee/department');
 const {Position} = require('../../models/employee/position');
@@ -8,8 +6,25 @@ const {Skill} = require('../../models/employee/skill');
 
 // Employee List
 exports.index = async (req, res) => {
+    const pageNumber = 1;
+    const pageSize = 10;
     try {
-        const employees = await Employee.find().sort('name');
+        const employees = await Employee
+        .find({$and: [
+            req.query.name ? {name: req.query.name} : {},
+            req.query.department ? {'department.name': req.query.department} : {},
+            req.query.position ? {'position.name': req.query.position} : {},
+            req.query.skill ? {'skills.technology': req.query.skill} : {},
+            req.query.active ? {active: req.query.active} : {}
+        ]})
+        // .find({$and: [
+        //     {name: req.query.name},
+        //     {department: req.query.department},
+        //     {position: req.query.position}
+        // ]})
+        .skip((parseInt(req.query.page - 1) || pageNumber - 1) * pageSize)
+        .limit(pageSize)
+        .sort('name');
         res.status(200).json({
             count: employees.length,
             employees: employees.map(employee => {
@@ -27,7 +42,7 @@ exports.index = async (req, res) => {
                     }
                 }
             })
-        })
+        });
     } catch(err) {
         res.status(404).json({
             error: {
@@ -61,7 +76,6 @@ exports.show = async (req, res) => {
 
 // Employee Save
 exports.store = async (req, res) => {
-    console.log(req.body);
     try {
         const department = await Department.findById(req.body.departmentId);
         const position = await Position.findById(req.body.positionId);
@@ -135,7 +149,8 @@ exports.update = async (req, res) => {
                     name: position.name
                 },
                 skills: skills
-            }
+            },
+            {runValidators: true}
         );
         res.status(200).json({
             message: 'Employee updated successfully',
