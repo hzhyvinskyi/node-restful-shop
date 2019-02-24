@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 // Load Relative Model
-const Employee = require('../models/employee/employee');
-const {Department} = require('../models/employee/department');
-const {Position} = require('../models/employee/position');
-const {Skill} = require('../models/employee/skill');
+const Employee = require('../../models/employee/employee');
+const {Department} = require('../../models/employee/department');
+const {Position} = require('../../models/employee/position');
+const {Skill} = require('../../models/employee/skill');
 
 // Employee List
 exports.index = async (req, res) => {
@@ -14,7 +14,7 @@ exports.index = async (req, res) => {
             count: employees.length,
             employees: employees.map(employee => {
                 return {
-                    id: employee.id,
+                    _id: employee._id,
                     name: employee.name,
                     avatar: employee.avatar ? req.protocol + '://' + req.get('host') + '/' + employee.avatar : null,
                     active: employee.active,
@@ -23,7 +23,7 @@ exports.index = async (req, res) => {
                     skills: employee.skills,
                     request: {
                         method: 'GET',
-                        url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee.id
+                        url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee._id
                     }
                 }
             })
@@ -42,7 +42,7 @@ exports.show = async (req, res) => {
     try {
         const employee = await Employee.findById(req.params.id).populate('department position skills');
         res.status(200).json({
-            id: employee.id,
+            _id: employee._id,
             name: employee.name,
             avatar: employee.avatar ? req.protocol + '://' + req.get('host') + '/' + employee.avatar : null,
             active: employee.active,
@@ -61,6 +61,7 @@ exports.show = async (req, res) => {
 
 // Employee Save
 exports.store = async (req, res) => {
+    console.log(req.body);
     try {
         const department = await Department.findById(req.body.departmentId);
         const position = await Position.findById(req.body.positionId);
@@ -87,7 +88,7 @@ exports.store = async (req, res) => {
         res.status(201).json({
             message: 'Employee created successfully',
             employee: {
-                id: employee.id,
+                _id: employee._id,
                 name: employee.name,
                 avatar: employee.avatar ? req.protocol + '://' + req.get('host') + '/' + employee.avatar : null,
                 active: employee.active,
@@ -96,7 +97,7 @@ exports.store = async (req, res) => {
                 skills: employee.skills,
                 request: {
                     method: 'GET',
-                    url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee.id
+                    url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + employee._id
                 }
             }
         });
@@ -139,7 +140,7 @@ exports.update = async (req, res) => {
         res.status(200).json({
             message: 'Employee updated successfully',
             employee: {
-                id: req.params.id,
+                _id: req.params.id,
                 name: req.body.name || employee.name,
                 avatar: req.file ? req.file.path : employee.avatar,
                 active: req.body.active || employee.active,

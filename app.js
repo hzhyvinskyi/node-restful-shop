@@ -7,7 +7,10 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-const employeesRoutes = require('./api/routes/employees');
+const employeesRoutes = require('./api/routes/employees/employees');
+const departmentsRoutes = require('./api/routes/employees/departments');
+const positionsRoutes = require('./api/routes/employees/positions');
+const skillsRoutes = require('./api/routes/employees/skills');
 const ordersRoutes = require('./api/routes/orders');
 const productsRoutes = require('./api/routes/products');
 const usersRoutes = require('./api/routes/users');
@@ -45,6 +48,9 @@ app.use((req, res, next) => {
 });
 
 app.use('/employees', employeesRoutes);
+app.use('/departments', departmentsRoutes);
+app.use('/positions', positionsRoutes);
+app.use('/skills', skillsRoutes);
 app.use('/orders', ordersRoutes);
 app.use('/products', productsRoutes);
 app.use('/users', usersRoutes);
