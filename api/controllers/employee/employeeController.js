@@ -4,7 +4,7 @@ const {Department} = require('../../models/employee/department');
 const {Position} = require('../../models/employee/position');
 const {Skill} = require('../../models/employee/skill');
 
-// Employee List
+// Employees List
 exports.index = async (req, res) => {
     const pageNumber = 1;
     const pageSize = 10;
@@ -17,11 +17,6 @@ exports.index = async (req, res) => {
             req.query.skill ? {'skills.technology': req.query.skill} : {},
             req.query.active ? {active: req.query.active} : {}
         ]})
-        // .find({$and: [
-        //     {name: req.query.name},
-        //     {department: req.query.department},
-        //     {position: req.query.position}
-        // ]})
         .skip((parseInt(req.query.page - 1) || pageNumber - 1) * pageSize)
         .limit(pageSize)
         .sort('name');

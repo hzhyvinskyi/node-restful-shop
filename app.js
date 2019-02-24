@@ -1,7 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
 const mongoose = require('mongoose');
+const morgan = require('morgan');
+const path = require('path');
+global.appRoot = path.resolve(__dirname);
+const winston = require('./config/winston');
 require('dotenv').config();
 
 const app = express();
@@ -29,7 +32,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 if(process.env.NODE_ENV !== 'test') {
-    app.use(morgan('dev'));
+    app.use(morgan('combined', {stream: winston.stream}));
 }
 
 app.use((req, res, next) => {
