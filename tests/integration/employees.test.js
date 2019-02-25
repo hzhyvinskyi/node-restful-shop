@@ -13,9 +13,9 @@ chai.use(chaiHttp);
 const employee = {
     name: 'test',
     active: 'true',
-    sphere: 'test',
-    rank: 'test',
-    technologies: [
+    department: 'test',
+    position: 'test',
+    skills: [
         'test',
         'test'
     ]
@@ -54,7 +54,7 @@ describe('Employees', () => {
     describe('GET/:id employee', () => {
         it('Should get employee by the given id', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -62,7 +62,7 @@ describe('Employees', () => {
                 Object.keys(res.body).length.should.eql(1);
                 res.body.should.have.property('message');
                 chai.request(app).
-                post('/users/login').
+                post('/auth/login').
                 send({
                     email: user.email,
                     password: user.password
@@ -80,7 +80,7 @@ describe('Employees', () => {
                     send(employee).
                     end((err, res) => {
                         chai.request(app).
-                        get('/employees/' + res.body.employee.id).
+                        get('/employees/' + res.body.employee._id).
                         end((err, res) => {
                             res.should.have.status(200);
                             res.body.should.be.a('object');
@@ -92,9 +92,9 @@ describe('Employees', () => {
                             res.body.department.should.be.a('array');
                             res.body.position.should.be.a('array');
                             res.body.skills.should.be.a('array');
-                            res.body.department[0].should.have.property('sphere').eql(employee.sphere);
-                            res.body.position[0].should.have.property('rank').eql(employee.rank);
-                            res.body.skills[0].should.have.property('technologies').eql(employee.technologies);
+                            res.body.department[0].should.have.property('name').eql(employee.sphere);
+                            res.body.position[0].should.have.property('name').eql(employee.rank);
+                            res.body.skills[0].should.have.property('technology').eql(employee.technologies);
                             done();
                         });
                     });
@@ -105,7 +105,7 @@ describe('Employees', () => {
     describe('POST employee', () => {
         it('Shouldn\'t store employee without name', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -113,7 +113,7 @@ describe('Employees', () => {
                 Object.keys(res.body).length.should.eql(1);
                 res.body.should.have.property('message');
                 chai.request(app).
-                post('/users/login').
+                post('/auth/login').
                 send({
                     email: user.email,
                     password: user.password
@@ -125,11 +125,11 @@ describe('Employees', () => {
                     res.body.should.have.property('message').eql('Auth successful');
                     res.body.should.have.property('token');
                     const token = res.body.token;
-                    const {active, sphere, rank, technologies} = employee;
+                    const {active, department, position, skills} = employee;
                     chai.request(app).
                     post('/employees').
                     set('Authorization', 'Bearer ' + token).
-                    send(active, sphere, rank, technologies).
+                    send(active, department, position, skills).
                     end((err, res) => {
                         res.should.have.status(400);
                         res.body.should.be.a('object');
@@ -142,7 +142,7 @@ describe('Employees', () => {
         });
         it('Should store employee', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -150,7 +150,7 @@ describe('Employees', () => {
                 Object.keys(res.body).length.should.eql(1);
                 res.body.should.have.property('message');
                 chai.request(app).
-                post('/users/login').
+                post('/auth/login').
                 send({
                     email: user.email,
                     password: user.password
@@ -167,6 +167,7 @@ describe('Employees', () => {
                     set('Authorization', 'Bearer ' + token).
                     send(employee).
                     end((err, res) => {
+                        console.log(res);
                         res.should.have.status(201);
                         res.body.should.be.a('object');
                         res.body.should.have.property('message').eql('Employee created successfully');
@@ -178,9 +179,9 @@ describe('Employees', () => {
                         res.body.employee.should.have.property('department');
                         res.body.employee.should.have.property('position');
                         res.body.employee.should.have.property('skills');
-                        res.body.employee.department[0].should.have.property('sphere');
-                        res.body.employee.position[0].should.have.property('rank');
-                        res.body.employee.skills[0].should.have.property('technologies');
+                        res.body.employee.department[0].should.have.property('name');
+                        res.body.employee.position[0].should.have.property('name');
+                        res.body.employee.skills[0].should.have.property('technology');
                         done();
                     });
                 });
@@ -190,7 +191,7 @@ describe('Employees', () => {
     describe('PUT/:id employee', () => {
         it('Should update employee by the given id', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -198,7 +199,7 @@ describe('Employees', () => {
                 Object.keys(res.body).length.should.eql(1);
                 res.body.should.have.property('message');
                 chai.request(app).
-                post('/users/login').
+                post('/auth/login').
                 send({
                     email: user.email,
                     password: user.password
@@ -216,7 +217,7 @@ describe('Employees', () => {
                     send(employee).
                     end((err, res) => {
                         chai.request(app).
-                        put('/employees/' + res.body.employee.id).
+                        put('/employees/' + res.body.employee._id).
                         set('Authorization', 'Bearer ' + token).
                         send({
                             name: 'updated',
@@ -240,9 +241,9 @@ describe('Employees', () => {
                             res.body.employee.should.have.property('department');
                             res.body.employee.should.have.property('position');
                             res.body.employee.should.have.property('skills');
-                            res.body.employee.department.should.have.property('sphere').eql(employee.sphere);
-                            res.body.employee.position.should.have.property('rank').eql(employee.rank);
-                            res.body.employee.skills.should.have.property('technologies').not.eql(employee.technologies);
+                            res.body.employee.department.should.have.property('name').eql(employee.department.name);
+                            res.body.employee.position.should.have.property('position').eql(employee.position.name);
+                            res.body.employee.skills.should.have.property('technology').not.eql(employee.skills.technology);
                             done();
                         });
                     });
@@ -253,7 +254,7 @@ describe('Employees', () => {
     describe('DELETE/:id employee', () => {
         it('Should delete employee by the given id', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -261,7 +262,7 @@ describe('Employees', () => {
                 Object.keys(res.body).length.should.eql(1);
                 res.body.should.have.property('message');
                 chai.request(app).
-                post('/users/login').
+                post('/auth/login').
                 send({
                     email: user.email,
                     password: user.password
@@ -279,7 +280,7 @@ describe('Employees', () => {
                     send(employee).
                     end((err, res) => {
                         chai.request(app).
-                        delete('/employees/' + res.body.employee.id).
+                        delete('/employees/' + res.body.employee._id).
                         set('Authorization', 'Bearer ' + token).
                         end((err, res) => {
                             res.should.have.status(200);

@@ -2,15 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const positionSchema = new Schema({
-    employee: {
-        type: Schema.Types.ObjectId,
-        ref: 'Employee',
-        required: true
-    },
-    rank: {
+    name: {
         type: String,
         required: true
     }
 });
 
-module.exports = mongoose.model('Position', positionSchema);
+const Position = mongoose.model('Position', positionSchema);
+
+exports.Position = Position;
+exports.positionSchema = positionSchema;

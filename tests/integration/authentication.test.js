@@ -30,7 +30,7 @@ describe('Authentication', () => {
     describe('POST login', () => {
         it('Shouldn\'t sign in user if invalid credentials', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -38,23 +38,23 @@ describe('Authentication', () => {
                 Object.keys(res.body).length.should.eql(1);
                 res.body.should.have.property('message');
                 chai.request(app).
-                post('/users/login').
+                post('/auth/login').
                 send({
                     email: invalidUser.email,
                     password: invalidUser.password
                 }).
                 end((err, res) => {
-                    res.should.have.status(401);
+                    res.should.have.status(400);
                     res.body.should.be.a('object');
                     res.body.should.have.property('error')
-                    res.body.error.should.have.property('message').eql('Auth failed');
+                    res.body.error.should.have.property('message').eql('Invalid credentials');
                     done()
                 });
             });
         });
         it('Should sign in user if right credentials', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -62,7 +62,7 @@ describe('Authentication', () => {
                 Object.keys(res.body).length.should.eql(1);
                 res.body.should.have.property('message');
                 chai.request(app).
-                post('/users/login').
+                post('/auth/login').
                 send({
                     email: user.email,
                     password: user.password
@@ -81,7 +81,7 @@ describe('Authentication', () => {
     describe('POST register', () => {
         it('Shouldn\'t sing up user if invalid credentials', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(invalidUser).
             end((err, res) => {
                 res.should.have.status(400);
@@ -93,7 +93,7 @@ describe('Authentication', () => {
         });
         it('Should sing up user if right credentials', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);

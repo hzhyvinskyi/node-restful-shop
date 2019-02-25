@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const {departmentSchema} = require('./department');
+const {positionSchema} = require('./position');
+const {skillSchema} = require('./skill');
 
 const employeeSchema = new Schema({
-    _id: Schema.Types.ObjectId,
     name: {
         type: String,
         required: true
@@ -14,21 +16,15 @@ const employeeSchema = new Schema({
         type: Boolean,
         default: true
     },
-    department: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Department',
+    department: {
+        type: departmentSchema,
         required: true
-    }],
-    position: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Position',
+    },
+    position: {
+        type: positionSchema,
         required: true
-    }],
-    skills: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Skill',
-        required: true
-    }]
+    },
+    skills: [skillSchema]
 });
 
 module.exports = mongoose.model('Employee', employeeSchema);

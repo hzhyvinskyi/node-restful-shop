@@ -1,7 +1,5 @@
 // Load User Model
 const User = require('../models/user');
-const bcryptjs = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 exports.index = async (req, res) => {
     try {
@@ -10,7 +8,7 @@ exports.index = async (req, res) => {
             count: users.length,
             users: users.map(user => {
                 return {
-                    id: user.id,
+                    _id: user._id,
                     name: user.name,
                     email: user.email,
                     registered: user.createdAt,
@@ -31,7 +29,7 @@ exports.show = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         res.status(200).json({
-            id: user.id,
+            _id: user._id,
             name: user.name,
             email: user.email,
             registered: user.createdAt,
@@ -46,59 +44,39 @@ exports.show = async (req, res) => {
     }
 };
 
-exports.login = async (req, res) => {
+exports.update = async (req, res) => {
     try {
-        const user = await User.findOne({email: req.body.email});
-        await bcryptjs.compare(req.body.password, user.password);
-        const token = await jwt.sign({email: user.email, id: user.id}, process.env.JWT_KEY, {expiresIn: '12h'});
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            {
+                name: req.body.name,
+                email: req.body.email,
+                updated: Date.now
+            },
+            {runValidators: true}
+        );
         res.status(200).json({
-            message: 'Auth successful',
-            token: token
-        });
-    } catch(err) {
-        res.status(401).json({
-            error: {
-                message: 'Auth failed'
+            message: 'User updated successfully',
+            user: {
+                _id: req.params.id,
+                name: req.body.name || user.name,
+                email: req.body.email || user.email,
+                registered: user.created,
+                updated: user.updated,
+                request: {
+                    method: 'GET',
+                    url: req.protocol + '://' + req.get('host') + req.baseUrl + '/' + user._id
+                }
             }
         });
-    }
-};
-
-exports.register = async (req, res) => {
-    try {
-        const user = await User.findOne({email: req.body.email});
-        if(user) {
-            res.status(409).json({
-                error: {
-                    message: 'Email already exists'
-                }
-            });
-        } else if(req.body.password.length < 8) {
-            res.status(400).json({
-                error: {
-                    message: 'Password must contain at least 8 characters'
-                }
-            });
-        }
-        const hash = await bcryptjs.hash(req.body.password, 10);
-        const newUser = new User({
-            name: req.body.name,
-            email: req.body.email,
-            password: hash
-        });
-        await newUser.save();
-        res.status(201).json({
-            message: 'Registration was successful. Now you can login: '
-                + req.protocol + '://' + req.get('host') + '/users/login'
-        });
     } catch(err) {
-        res.status(400).json({
+        res.status(404).json({
             error: {
                 message: err.message
             }
         });
     }
-};
+}
 
 // Employee Update
 exports.update = async (req, res) => {

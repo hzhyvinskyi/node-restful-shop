@@ -35,7 +35,7 @@ describe('Users', () => {
         });
         it('Should get users list', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -49,7 +49,7 @@ describe('Users', () => {
                     res.body.should.be.a('object');
                     res.body.should.have.property('count').eql(1);
                     res.body.should.have.property('users').be.a('array');
-                    res.body.users[0].should.have.property('id');
+                    res.body.users[0].should.have.property('_id');
                     res.body.users[0].should.have.property('name').eql(user.name);
                     res.body.users[0].should.have.property('email').eql(user.email);
                     res.body.users[0].should.have.property('registered');
@@ -62,7 +62,7 @@ describe('Users', () => {
     describe('GET/:id user', () => {
         it('Should get user details', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -73,11 +73,11 @@ describe('Users', () => {
                 get('/users').
                 end((err, list) => {
                     chai.request(app).
-                    get('/users/' + list.body.users[0].id).
+                    get('/users/' + list.body.users[0]._id).
                     end((err, res) => {
                         res.should.have.status(200);
                         res.body.should.be.a('object');
-                        res.body.should.have.property('id').eql(list.body.users[0].id);
+                        res.body.should.have.property('_id').eql(list.body.users[0]._id);
                         res.body.should.have.property('name').eql(user.name);
                         res.body.should.have.property('email').eql(user.email);
                         res.body.should.have.property('registered');
@@ -91,7 +91,7 @@ describe('Users', () => {
     describe('DELETE/:id user', () => {
         it('Should delete user by the given id', done => {
             chai.request(app).
-            post('/users/register').
+            post('/auth/register').
             send(user).
             end((err, res) => {
                 res.should.have.status(201);
@@ -102,7 +102,7 @@ describe('Users', () => {
                 get('/users').
                 end((err, res) => {
                     chai.request(app).
-                    post('/users/login').
+                    post('/auth/login').
                     send(user).
                     end((err, logged) => {
                         logged.should.have.status(200);
@@ -110,7 +110,7 @@ describe('Users', () => {
                         logged.body.should.have.property('message').eql('Auth successful');
                         logged.body.should.have.property('token');
                         chai.request(app).
-                        delete('/users/' + res.body.users[0].id).
+                        delete('/users/' + res.body.users[0]._id).
                         set('Authorization', 'Bearer ' + logged.body.token).
                         end((err, res) => {
                             res.should.have.status(200);

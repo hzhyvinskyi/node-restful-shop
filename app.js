@@ -1,16 +1,23 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
 const mongoose = require('mongoose');
+const morgan = require('morgan');
+const path = require('path');
+global.appRoot = path.resolve(__dirname);
+const winston = require('./config/winston');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-const employeesRoutes = require('./api/routes/employees');
+const employeesRoutes = require('./api/routes/employees/employees');
+const departmentsRoutes = require('./api/routes/employees/departments');
+const positionsRoutes = require('./api/routes/employees/positions');
+const skillsRoutes = require('./api/routes/employees/skills');
 const ordersRoutes = require('./api/routes/orders');
 const productsRoutes = require('./api/routes/products');
 const usersRoutes = require('./api/routes/users');
+const authRoutes = require('./api/routes/auth');
 
 const db = require('./config/db');
 
@@ -25,7 +32,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 if(process.env.NODE_ENV !== 'test') {
-    app.use(morgan('dev'));
+    app.use(morgan('combined', {stream: winston.stream}));
 }
 
 app.use((req, res, next) => {
@@ -45,9 +52,13 @@ app.use((req, res, next) => {
 });
 
 app.use('/employees', employeesRoutes);
+app.use('/departments', departmentsRoutes);
+app.use('/positions', positionsRoutes);
+app.use('/skills', skillsRoutes);
 app.use('/orders', ordersRoutes);
 app.use('/products', productsRoutes);
 app.use('/users', usersRoutes);
+app.use('/auth', authRoutes);
 
 app.use((req, res, next) => {
     if(req.originalUrl && req.originalUrl.split('/').pop() === 'favicon.ico') {

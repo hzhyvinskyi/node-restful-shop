@@ -2,15 +2,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const skillSchema = new Schema({
-    employee: {
-        type: Schema.Types.ObjectId,
-        ref: 'employee',
-        required: true
-    },
-    technologies: [{
-        type: String,
-        required: true
-    }]
+    technology: String
 });
 
-module.exports = mongoose.model('Skill', skillSchema);
+const Skill = mongoose.model('Skill', skillSchema);
+
+exports.Skill = Skill;
+exports.skillSchema = skillSchema;

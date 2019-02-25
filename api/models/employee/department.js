@@ -2,15 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const departmentSchema = new Schema({
-    employee: {
-        type: Schema.Types.ObjectId,
-        ref: 'Employee',
-        required: true
-    },
-    sphere: {
+    name: {
         type: String,
         required: true
     }
 });
 
-module.exports = mongoose.model('Department', departmentSchema);
+const Department = mongoose.model('Department', departmentSchema);
+
+exports.Department = Department;
+exports.departmentSchema = departmentSchema;
